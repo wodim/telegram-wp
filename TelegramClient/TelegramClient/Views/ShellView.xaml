@@ -1,0 +1,57 @@
+﻿<views:TelegramViewBase
+    x:Class="TelegramClient.Views.ShellView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:views="clr-namespace:TelegramClient.Views"
+    xmlns:micro="clr-namespace:Caliburn.Micro;assembly=Caliburn.Micro"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait" Orientation="Portrait"
+    mc:Ignorable="d"
+    x:Name="Self"
+    toolkit:TiltEffect.IsTiltEnabled="True"
+    shell:SystemTray.Opacity="0.0"
+    shell:SystemTray.IsVisible="True" d:DesignHeight="768" d:DesignWidth="480">
+    
+    <shell:SystemTray.ProgressIndicator>
+        <shell:ProgressIndicator x:Name="ProgressIndicator" IsIndeterminate="{Binding ActiveItem.IsWorking}" IsVisible="True" Text="{Binding MTProtoService.Message}" />
+    </shell:SystemTray.ProgressIndicator>
+    
+    <Grid x:Name="LayoutRoot" Background="Transparent" CacheMode="BitmapCache">
+        <Grid.RenderTransform>
+            <CompositeTransform x:Name="LayoutRootTransform"/>
+        </Grid.RenderTransform>
+        <Grid.Projection>
+            <PlaneProjection x:Name="LayoutRootProjection" CenterOfRotationX="0"/>
+        </Grid.Projection>
+        <controls:Pivot Margin="0,32,0,0" 
+                        x:Name="Items"
+                        SelectedItem="{Binding ActiveItem, Mode=TwoWay}">
+            <controls:Pivot.Title>
+                <TextBlock Margin="0,0,0,-3" IsHitTestVisible="False" Text="{Binding Resources.AppName, Source={StaticResource Strings}, Converter={StaticResource Uppercase}}" Style="{StaticResource ApplicationTitleStyle}"/>
+            </controls:Pivot.Title>
+            <controls:Pivot.HeaderTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding DisplayName}"/>
+                </DataTemplate>
+            </controls:Pivot.HeaderTemplate>
+        </controls:Pivot>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Background="Transparent" Margin="24,0,0,0" micro:Message.Attach="[Event Tap] = [Action ChangePasscodeState]">
+            <TextBlock Margin="0,43,0,-3" IsHitTestVisible="False" Opacity="0" Text="{Binding Resources.AppName, Source={StaticResource Strings}, Converter={StaticResource Uppercase}}" Style="{StaticResource ApplicationTitleStyle}"/>
+            <Button Margin="0,43,0,0" Style="{StaticResource HiddenButtonStyle}" >
+                <Border Width="18" Height="18" Margin="-2,0,0,-3" Opacity="0" IsHitTestVisible="False" x:Name="PasscodeIcon" Background="{Binding PasscodeImageBrush}" Visibility="{Binding IsPasscodeEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border.OpacityMask>
+                        <ImageBrush Stretch="Uniform" ImageSource="{Binding PasscodeImageSource}" ImageOpened="ImageBrush_OnImageOpened"/>
+                    </Border.OpacityMask>
+                </Border>
+            </Button>
+        </StackPanel>
+    </Grid>
+
+</views:TelegramViewBase>

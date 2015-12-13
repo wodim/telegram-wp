@@ -1,0 +1,7 @@
+﻿<micro:CaliburnApplication
+    x:Class="TelegramClient.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:micro="clr-namespace:Caliburn.Micro;assembly=Caliburn.Micro.Platform">
+
+</micro:CaliburnApplication>

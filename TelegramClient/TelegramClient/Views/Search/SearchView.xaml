@@ -1,0 +1,346 @@
+﻿<views:TelegramViewBase
+    x:Class="TelegramClient.Views.Search.SearchView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+    xmlns:behaviors="clr-namespace:TelegramClient.Behaviors"
+    xmlns:tlgControls="clr-namespace:Telegram.Controls;assembly=Telegram.Controls"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:navigation="clr-namespace:TelegramClient.Animation.Navigation"
+    xmlns:views="clr-namespace:TelegramClient.Views"
+    xmlns:micro="clr-namespace:Caliburn.Micro;assembly=Caliburn.Micro"
+    xmlns:templateSelectors="clr-namespace:TelegramClient.Helpers.TemplateSelectors"
+    xmlns:controls="clr-namespace:TelegramClient.Views.Controls"
+    xmlns:triggers="clr-namespace:Telegram.Controls.Triggers;assembly=Telegram.Controls"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait" Orientation="Portrait"
+    toolkit:TiltEffect.IsTiltEnabled="True"
+    x:Name="Self"
+    mc:Ignorable="d"
+    shell:SystemTray.Opacity="0.0"
+    shell:SystemTray.IsVisible="True">
+
+    <shell:SystemTray.ProgressIndicator>
+        <shell:ProgressIndicator x:Name="ProgressIndicator" IsIndeterminate="{Binding IsWorking}" IsVisible="True" />
+    </shell:SystemTray.ProgressIndicator>
+
+    <views:TelegramViewBase.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="DialogTemplate">
+                <ListBoxItem>
+                    <Grid x:Name="MainItemGrid" Margin="0,-12,24,0" Background="Transparent" Tap="MainItemGrid_OnTap" Hold="MainItemGrid_OnHold" micro:Message.Attach="[Event Tap] = [Action OpenDialogDetails($DataContext)]">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Grid Margin="12,12,0,12" Grid.RowSpan="2" Height="62" Width="62">
+                            <Border Background="{Binding Index, Converter={StaticResource PlaceholderBackgroundConverter}}"/>
+                            <TextBlock FontSize="27" Margin="0,-2,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" Text="{Binding Converter={StaticResource PlaceholderDefaultTextConverter}}"/>
+                            <Image Source="{Binding Photo, Converter={StaticResource DefaultPhotoConverter}}"/>
+                        </Grid>
+
+                        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="0,-2,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+
+                                <Grid Grid.Column="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <tlgControls:HighlightingTextBlock Grid.Column="0"
+                                                    navigation:AnimatedBasePage.IsAnimationTarget="True"
+                                                    HorizontalAlignment="Left"
+                                                    Margin="14,-6,0,0"
+                                                    MaxHeight="42.56"
+                                                    HighlightBrush="{StaticResource PhoneAccentBrush}" 
+                                                    HighlightText="{Binding DataContext.Text, ElementName=Self}"
+                                                    UseTransliteration="True"
+                                                    Text="{Binding FullName}">
+                                        <tlgControls:HighlightingTextBlock.TextBlockStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource PhoneTextLargeStyle}">
+                                                <Setter Property="Margin" Value="0"/>
+                                            </Style>
+                                        </tlgControls:HighlightingTextBlock.TextBlockStyle>
+                                    </tlgControls:HighlightingTextBlock>
+
+                                    <Border Background="{StaticResource PhoneAccentBrush}" Width="17" Height="17"
+                                        Grid.Column="1" 
+                                        Visibility="{Binding IsVerified, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"
+                                        HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                        Margin="8,0,0,8">
+                                        <Border.OpacityMask>
+                                            <ImageBrush ImageSource="/Images/Dialogs/channel.check-WXGA.png" Stretch="Uniform"/>
+                                        </Border.OpacityMask>
+                                    </Border>
+                                </Grid>
+                                
+                                <Border Grid.Column="1" Background="Transparent" VerticalAlignment="Bottom" Margin="8,-2,0,3" Visibility="{Binding Dialog.UnreadCount, Converter={StaticResource UnreadCountToVisibilityConverter}}">
+                                    <TextBlock Margin="0,1" Text="{Binding Dialog.UnreadCount}" Foreground="{StaticResource PhoneAccentBrush}" LineStackingStrategy="BlockLineHeight" LineHeight="22" Style="{StaticResource PhoneTextSubtleStyle}"/>
+                                </Border>
+                            </Grid>
+                            <!--<TextBlock Grid.Row="1" Margin="15,-4,0,0" Text="{Binding StatusCommon, Converter={StaticResource UserStatusToStringConverter}}" Foreground="{Binding StatusCommon, Converter={StaticResource UserStatusToBrushConverter}}" Visibility="{Binding Converter={StaticResource ContactToVisibilityConverter}}" Style="{StaticResource PhoneTextSubtleStyle}"/>-->
+                        </Grid>
+                    </Grid>
+                </ListBoxItem>
+            </DataTemplate>
+
+            <DataTemplate x:Key="TextTemplate">
+                <Grid Margin="12,0,12,12" Height="44">
+                    <TextBlock VerticalAlignment="Center" Margin="0,-4,12,0" Text="{Binding Text, Converter={StaticResource Lowercase}}" Style="{StaticResource PhoneTextGroupHeaderStyle}"/>
+                </Grid>
+            </DataTemplate>
+            
+            <DataTemplate x:Key="GlobalUserItemTemplate">
+                <ListBoxItem>
+                    <Grid x:Name="MainItemGrid" Margin="12,0,24,12" Background="Transparent"  micro:Message.Attach="[Event Tap] = [Action OpenDialogDetails($DataContext)]">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="62"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="62" Height="62" Background="{Binding Index, Converter={StaticResource PlaceholderBackgroundConverter}}">
+                            <Grid>
+                                <TextBlock FontSize="27" Margin="0,-2,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" Text="{Binding Converter={StaticResource PlaceholderDefaultTextConverter}}"/>
+                                <Image Source="{Binding Photo, Converter={StaticResource DefaultPhotoConverter}}"/>
+                            </Grid>
+                        </Border>
+                        <Grid Grid.Column="1" VerticalAlignment="Center" Margin="0,-2,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    navigation:AnimatedBasePage.IsAnimationTarget="True"
+                                    Margin="14,-6,0,0"
+                                    Text="{Binding FullName}" 
+                                    MaxHeight="42.56"
+                                    Foreground="{StaticResource PhoneForegroundBrush}"
+                                    Style="{StaticResource PhoneTextLargeStyle}"/>
+
+                                <Border Background="{StaticResource PhoneAccentBrush}" Width="17" Height="17"
+                                    Grid.Column="1" 
+                                    Visibility="{Binding IsVerified, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                    Margin="8,0,0,8">
+                                    <Border.OpacityMask>
+                                        <ImageBrush ImageSource="/Images/Dialogs/channel.check-WXGA.png" Stretch="Uniform"/>
+                                    </Border.OpacityMask>
+                                </Border>
+                            </Grid>
+
+                            <StackPanel Grid.Row="1" Margin="15,-4,0,0" Orientation="Horizontal">
+                                <TextBlock Text="@" Margin="0" Foreground="{StaticResource PhoneAccentBrush}" Style="{StaticResource PhoneTextSubtleStyle}"/>
+                                <tlgControls:HighlightingTextBlock
+                                    HighlightBrush="{StaticResource PhoneAccentBrush}" 
+                                    HighlightText="{Binding DataContext.Text, ElementName=Self}" 
+                                    Text="{Binding UserName}">
+                                    <tlgControls:HighlightingTextBlock.TextBlockStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource PhoneTextSubtleStyle}">
+                                            <Setter Property="Margin" Value="0"/>
+                                        </Style>
+                                   </tlgControls:HighlightingTextBlock.TextBlockStyle>
+                                </tlgControls:HighlightingTextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </ListBoxItem>
+            </DataTemplate>
+            
+            <DataTemplate x:Key="MessageTemplate">
+                <ListBoxItem>
+                    <Grid x:Name="MainItemGrid" Margin="0,0,18,-12" Background="Transparent" Tap="MainItemGrid_OnTap" micro:Message.Attach="[Event Tap] = [Action OpenDialogDetails($DataContext)]">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <!--Chat tile-->
+                        <views:ConversationTileControl Margin="12,12,0,7" Grid.RowSpan="2" VerticalAlignment="Top"/>
+
+                        <!--Message info-->
+                        <Grid Grid.Column="1" Grid.ColumnSpan="3" Margin="2,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock 
+                                navigation:AnimatedBasePage.IsAnimationTarget="True"
+                                Margin="12,-2,0,-1" FontSize="36.667" Height="48.77" Text="{Binding With, Converter={StaticResource DialogCaptionConverter}}" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
+                                <!--<TextBlock VerticalAlignment="Bottom" Margin="4,0,0,4" Opacity="0.7" Text="•" Style="{StaticResource PhoneTextLargeStyle}" Visibility="{Binding With.Status, Converter={StaticResource UserStatus}, FallbackValue=Collapsed}"/>-->
+                            </StackPanel>
+                            <!--<Border Grid.Column="1" Margin="6,0,0,0" Visibility="{Binding UnreadCount.Value, Converter={StaticResource CountMoreThanToVisibilityConverter}, ConverterParameter=0}" Background="{StaticResource PhoneAccentBrush}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding UnreadCount}" Foreground="White" Margin="8,3"/>
+                        </Border>-->
+                        </Grid>
+
+                        <Grid Grid.Row="1" Grid.Column="1" VerticalAlignment="Top" Margin="2,0,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Height="22"
+                               Margin="13,0,12,0"
+                               LineStackingStrategy="BlockLineHeight" LineHeight="22" MaxHeight="22"
+                               Text="{Binding Self, Converter={StaticResource DialogMessageFromConverter}}"
+                               FontFamily="{StaticResource PhoneFontFamilySemiBold}"
+                               Visibility="{Binding TopMessage.ShowFrom, Converter={StaticResource BooleanToVisibilityConverter}}"
+                               Style="{StaticResource PhoneTextSubtleStyle}"/>
+                            <TextBlock Grid.Row="1" MinHeight="22" MaxHeight="{Binding TopMessage.ShowFrom, Converter={StaticResource ChatToMaxHeight}}"
+                            Margin="13,0,0,22"
+                            LineStackingStrategy="BlockLineHeight" LineHeight="22"
+                            Text="{Binding Self, Converter={StaticResource DialogToBriefInfo}}" TextWrapping="Wrap" 
+                            Foreground="{Binding Self, Converter={StaticResource MessageForeground}, FallbackValue={StaticResource PhoneSubtleBrush}}"
+                            TextTrimming="WordEllipsis"
+                            Style="{StaticResource PhoneTextSubtleStyle}"/>
+                        </Grid>
+                        <StackPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,0,0,0" Orientation="Horizontal">
+                            <controls:MessageStatusControl Visibility="{Binding TopMessage.Out.Value, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Top" Height="18"/>
+                            <TextBlock Margin="12,0,0,0" FontFamily="{StaticResource PhoneFontFamilySemiBold}" LineStackingStrategy="BlockLineHeight" LineHeight="22" Text="{Binding TopMessage.Date, Converter={StaticResource DialogDateTimeConverter}}" Style="{StaticResource PhoneTextSubtleStyle}"/>
+                        </StackPanel>
+                    </Grid>
+                </ListBoxItem>
+            </DataTemplate>
+
+            <templateSelectors:SearchTemplateSelector 
+                x:Key="SearchTemplateSelector" 
+                UserTemplate="{StaticResource GlobalUserItemTemplate}"
+                TextTemplate="{StaticResource TextTemplate}"
+                DialogTemplate="{StaticResource DialogTemplate}"
+                MessageTemplate="{StaticResource MessageTemplate}"/>
+        </ResourceDictionary>
+    </views:TelegramViewBase.Resources>
+
+    <Grid x:Name="LayoutRoot" Background="Transparent">
+        <Grid.RenderTransform>
+            <CompositeTransform/>
+        </Grid.RenderTransform>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="1">
+            <!--<Border Margin="0,-24,0,0" Background="{StaticResource PhoneBackgroundBrush}" Visibility="{Binding Text, ElementName=SearchBox, Converter={StaticResource EmptyStringToVisibilityConverter}}">
+                <TextBlock Margin="24" TextWrapping="Wrap" Text="{Binding SearchHint}" Style="{StaticResource PhoneTextGroupHeaderStyle}"/>
+            </Border>
+            <Border Visibility="{Binding ShowRecent, Converter={StaticResource BooleanToVisibilityConverter}}" Background="{StaticResource PhoneBackgroundBrush}">
+                <StackPanel>
+                    <Grid Margin="12,0,12,0" Height="44">
+                        <TextBlock VerticalAlignment="Center" Margin="12,-4,12,0" Text="{Binding Resources.Recent, Source={StaticResource Strings}, Converter={StaticResource Lowercase}}" Style="{StaticResource PhoneTextGroupHeaderStyle}"/>
+                    </Grid>
+                    <crols:LazyListBox 
+                        Margin="12,-1,12,0"
+                        x:Name="Recent"
+                        ItemsSource="{Binding Recent}"
+                        ItemTemplate="{StaticResource DialogTemplate}"
+                        ScrollingStateChanged="Items_OnScrollingStateChanged"
+                        Style="{StaticResource LazyListBoxStyle}">
+                        <tlgcrols:LazyListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel/>
+                            </ItemsPanelTemplate>
+                        </tlgcrols:LazyListBox.ItemsPanel>
+                    </controls:LazyListBox>
+                </StackPanel>
+            </Border>-->
+        </Grid>
+
+        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,29,12,12">
+            <tlgControls:WatermarkedTextBox x:Name="SearchBox" Text="{Binding Text, Mode=TwoWay}" Watermark="{Binding Resources.Search, Source={StaticResource Strings}, Converter={StaticResource Lowercase}}">
+                <tlgControls:WatermarkedTextBox.InputScope>
+                    <InputScope>
+                        <InputScopeName NameValue="Search"/>
+                    </InputScope>
+                </tlgControls:WatermarkedTextBox.InputScope>
+                <i:Interaction.Behaviors>
+                    <behaviors:UpdateTextBindingBehavior/>
+                </i:Interaction.Behaviors>
+            </tlgControls:WatermarkedTextBox>
+        </StackPanel>
+
+        <Grid Grid.Row="1" Background="Transparent" Margin="12,0,0,0">
+            <tlgControls:LazyListBox 
+                x:Name="Items"
+                IsScrolling="{Binding IsScrolling, Mode=TwoWay}"
+                ManipulationStarted="Items_OnManipulationStarted"
+                CloseToEndPercent="0.1"
+                CloseToEnd="Items_OnCloseToEnd"
+                Style="{StaticResource LazyListBoxStyle}">
+                <tlgControls:LazyListBox.ItemTemplate>
+                    <DataTemplate>
+                        <ContentControl 
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" 
+                            Content="{Binding}" ContentTemplate="{Binding Converter={StaticResource SearchTemplateSelector}}">
+                        </ContentControl>
+                    </DataTemplate>
+                </tlgControls:LazyListBox.ItemTemplate>
+                <tlgControls:LazyListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel/>
+                    </ItemsPanelTemplate>
+                </tlgControls:LazyListBox.ItemsPanel>
+                <i:Interaction.Triggers>
+                    <triggers:CompressionTrigger CompressionType="Bottom">
+                        <micro:ActionMessage MethodName="LoadNextSlice"/>
+                    </triggers:CompressionTrigger>
+                </i:Interaction.Triggers>
+            </tlgControls:LazyListBox>
+            <TextBlock Text="{Binding Status}" VerticalAlignment="Top" HorizontalAlignment="Left" Style="{StaticResource PhoneTextGroupHeaderStyle}"/>
+        </Grid>
+
+        <Border Grid.Row="1" Visibility="{Binding ShowRecent, Converter={StaticResource BooleanToVisibilityConverter}}" Background="{StaticResource PhoneBackgroundBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Margin="12,0,12,0" Height="44">
+                    <TextBlock VerticalAlignment="Center" Margin="12,-4,12,0" Text="{Binding Resources.Recent, Source={StaticResource Strings}, Converter={StaticResource Lowercase}}" Style="{StaticResource PhoneTextGroupHeaderStyle}"/>
+                </Grid>
+                <tlgControls:LazyListBox
+                    Grid.Row="1"
+                    Margin="12,24,0,0"
+                    x:Name="Recent"
+                    ItemsSource="{Binding Recent}"
+                    ItemTemplate="{StaticResource DialogTemplate}"
+                    ManipulationStarted="Items_OnManipulationStarted"
+                    Style="{StaticResource LazyListBoxStyle}">
+                    <tlgControls:LazyListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel/>
+                        </ItemsPanelTemplate>
+                    </tlgControls:LazyListBox.ItemsPanel>
+                </tlgControls:LazyListBox>
+            </Grid>
+        </Border>
+    </Grid>
+</views:TelegramViewBase>
